@@ -408,7 +408,7 @@ ol.acts li .more{grid-column:1/-1;display:flex;flex-direction:column;gap:5px;mar
     var list=visible();if(list.indexOf(String(no))<0)list=order;
     cur=list.indexOf(String(no));
     box.replaceChildren(t.content.cloneNode(true));box.scrollTop=0;conv(box);
-    cnt.textContent=(cur+1)+' / '+list.length;cnt.dataset.no=no;setHash('#h'+no);
+    cnt.textContent=(cur+1)+' / '+list.length;cnt.dataset.no=no;navState(no);
     prev.disabled=cur<=0;next.disabled=cur>=list.length-1;
     prev.onclick=function(){if(cur>0)show(list[cur-1])};
     next.onclick=function(){if(cur<list.length-1)show(list[cur+1])};
@@ -431,22 +431,24 @@ ol.acts li .more{grid-column:1/-1;display:flex;flex-direction:column;gap:5px;mar
   setUnit(unit);
   document.getElementById('hvclose').onclick=function(){dlg.close()};
   dlg.addEventListener('click',function(ev){if(ev.target===dlg)dlg.close()});
-  var tx=0,ty=0,tok=false;
-  box.addEventListener('touchstart',function(ev){var t=ev.touches[0];tx=t.clientX;ty=t.clientY;tok=!(ev.target.closest&&ev.target.closest('.seats,.opts'))},{passive:true});
-  box.addEventListener('touchend',function(ev){if(!tok)return;var t=ev.changedTouches[0],dx=t.clientX-tx,dy=t.clientY-ty;if(Math.abs(dx)>80&&Math.abs(dx)>2.5*Math.abs(dy)){(dx<0?next:prev).click()}},{passive:true});
+  var tx=0,ty=0,tok=false,edge=false;
+  box.addEventListener('touchstart',function(ev){var t=ev.touches[0];tx=t.clientX;ty=t.clientY;edge=standalone&&tx<=28;tok=!(ev.target.closest&&ev.target.closest('.seats,.opts'))},{passive:true});
+  box.addEventListener('touchend',function(ev){var t=ev.changedTouches[0],dx=t.clientX-tx,dy=t.clientY-ty;if(edge){if(dx>60&&Math.abs(dx)>1.5*Math.abs(dy))dlg.close();return}if(!tok)return;if(Math.abs(dx)>80&&Math.abs(dx)>2.5*Math.abs(dy)){(dx<0?next:prev).click()}},{passive:true});
   dlg.addEventListener('keydown',function(ev){if(ev.key==='ArrowLeft')prev.click();if(ev.key==='ArrowRight')next.click()});
     var SHARE='https://ai110002.github.io/hand-review-1124/',shared=false,closeBtn=document.getElementById('hvclose'),toastT=0;
   function toast(html,ms){var t=document.getElementById('hvtoast');if(!t){t=document.createElement('div');t.id='hvtoast';t.setAttribute('role','status');dlg.appendChild(t)}
     t.innerHTML=html;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(function(){t.hidden=true},ms||2200);return t}
   function setHash(h){try{history.replaceState(null,'',h||(location.pathname+location.search))}catch(_){}}
+  function navState(no){var u='#h'+no;try{if(history.state&&history.state.hv)history.replaceState({hv:1},'',u);else history.pushState({hv:1},'',u)}catch(_){}}
+  var standalone=!!(navigator.standalone||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches));
   document.getElementById('hvshare').onclick=function(){
     var no=(cnt.dataset.no||''),url=SHARE+'#h'+no;
     function manual(){var t=toast('複製這個連結傳給朋友：<br><input readonly value="'+url+'">',9000);var i=t.querySelector('input');i.focus();i.select()}
     function copy(){if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(url).then(function(){toast('已複製這手的連結，貼給朋友就好')},manual)}else manual()}
     if(navigator.share){navigator.share({title:'#'+no+' 這手牌',url:url}).catch(function(e){if(!e||e.name!=='AbortError')copy()})}else copy();
   };
-  dlg.addEventListener('close',function(){setHash('');if(shared){shared=false;closeBtn.textContent='✕ 關閉';window.scrollTo(0,0)}});
-  window.addEventListener('hashchange',function(){var m=/^#h(\d+)$/.exec(location.hash||'');if(m)show(m[1])});
-  var m=/^#h(\d+)$/.exec(location.hash||'');if(m&&document.getElementById('t'+m[1])){shared=true;closeBtn.textContent='☰ 看全部手牌';show(m[1])}
+  dlg.addEventListener('close',function(){if(history.state&&history.state.hv){try{history.back()}catch(_){}}else setHash('');if(shared){shared=false;closeBtn.textContent='✕ 關閉';window.scrollTo(0,0)}});
+  window.addEventListener('popstate',function(){var m=/^#h(\d+)$/.exec(location.hash||'');if(m){if(!dlg.open||cnt.dataset.no!==m[1])show(m[1])}else if(dlg.open)dlg.close()});
+  var m=/^#h(\d+)$/.exec(location.hash||'');if(m&&document.getElementById('t'+m[1])){shared=true;closeBtn.textContent='☰ 看全部手牌';setHash('');show(m[1])}
 })();
 </script></body></html>
