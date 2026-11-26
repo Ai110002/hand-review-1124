@@ -1,0 +1,16 @@
+{
+  "name": "WPT 翻後檢討",
+  "short_name": "牌譜檢討",
+  "description": "11/24、11/25 WPT 翻後求解檢討，每手可單獨分享",
+  "lang": "zh-Hant",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f7f4",
+  "theme_color": "#1f6b4a",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png"},
+    {"src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}
