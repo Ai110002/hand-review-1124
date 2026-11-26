@@ -380,7 +380,7 @@ ol.acts li .more{grid-column:1/-1;display:flex;flex-direction:column;gap:5px;mar
 <li>翻前不在這份報告裡。</li>
 </ul></details></section>
 </main>
-<dialog id="hv" aria-label="完整牌譜"><div class="hvbar"><span class="cnt" id="hvcnt"></span><button class="ib" id="hvunit" aria-label="切換金額單位">BB</button><button class="ib" id="hvclose" aria-label="關閉">✕ 關閉</button></div><div id="hvbody"></div><div class="hvfoot"><button class="ib" id="hvprev">‹ 上一手</button><button class="ib" id="hvnext">下一手 ›</button></div></dialog>
+<style>#hvshare{font-weight:600}#hvtoast{position:fixed;left:50%;bottom:calc(76px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:9;background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:14px;max-width:calc(100% - 32px);box-shadow:0 4px 14px rgba(0,0,0,.25)}#hvtoast input{width:min(70vw,420px);font:inherit;margin-top:6px;padding:4px 6px;border-radius:4px;border:0}</style><dialog id="hv" aria-label="完整牌譜"><div class="hvbar"><span class="cnt" id="hvcnt"></span><button class="ib" id="hvshare" aria-label="分享這手">↗ 分享這手</button><button class="ib" id="hvunit" aria-label="切換金額單位">BB</button><button class="ib" id="hvclose" aria-label="關閉">✕ 關閉</button></div><div id="hvbody"></div><div class="hvfoot"><button class="ib" id="hvprev">‹ 上一手</button><button class="ib" id="hvnext">下一手 ›</button></div></dialog>
 <script>
 (function(){
   var dlg=document.getElementById('hv'),box=document.getElementById('hvbody'),cnt=document.getElementById('hvcnt');
@@ -408,7 +408,7 @@ ol.acts li .more{grid-column:1/-1;display:flex;flex-direction:column;gap:5px;mar
     var list=visible();if(list.indexOf(String(no))<0)list=order;
     cur=list.indexOf(String(no));
     box.replaceChildren(t.content.cloneNode(true));box.scrollTop=0;conv(box);
-    cnt.textContent=(cur+1)+' / '+list.length;
+    cnt.textContent=(cur+1)+' / '+list.length;cnt.dataset.no=no;setHash('#h'+no);
     prev.disabled=cur<=0;next.disabled=cur>=list.length-1;
     prev.onclick=function(){if(cur>0)show(list[cur-1])};
     next.onclick=function(){if(cur<list.length-1)show(list[cur+1])};
@@ -435,6 +435,18 @@ ol.acts li .more{grid-column:1/-1;display:flex;flex-direction:column;gap:5px;mar
   box.addEventListener('touchstart',function(ev){var t=ev.touches[0];tx=t.clientX;ty=t.clientY;tok=!(ev.target.closest&&ev.target.closest('.seats,.opts'))},{passive:true});
   box.addEventListener('touchend',function(ev){if(!tok)return;var t=ev.changedTouches[0],dx=t.clientX-tx,dy=t.clientY-ty;if(Math.abs(dx)>80&&Math.abs(dx)>2.5*Math.abs(dy)){(dx<0?next:prev).click()}},{passive:true});
   dlg.addEventListener('keydown',function(ev){if(ev.key==='ArrowLeft')prev.click();if(ev.key==='ArrowRight')next.click()});
-  var m=/^#h(\d+)$/.exec(location.hash||'');if(m)show(m[1]);
+    var SHARE='https://ai110002.github.io/hand-review-1124/',shared=false,closeBtn=document.getElementById('hvclose'),toastT=0;
+  function toast(html,ms){var t=document.getElementById('hvtoast');if(!t){t=document.createElement('div');t.id='hvtoast';t.setAttribute('role','status');dlg.appendChild(t)}
+    t.innerHTML=html;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(function(){t.hidden=true},ms||2200);return t}
+  function setHash(h){try{history.replaceState(null,'',h||(location.pathname+location.search))}catch(_){}}
+  document.getElementById('hvshare').onclick=function(){
+    var no=(cnt.dataset.no||''),url=SHARE+'#h'+no;
+    function manual(){var t=toast('複製這個連結傳給朋友：<br><input readonly value="'+url+'">',9000);var i=t.querySelector('input');i.focus();i.select()}
+    function copy(){if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(url).then(function(){toast('已複製這手的連結，貼給朋友就好')},manual)}else manual()}
+    if(navigator.share){navigator.share({title:'#'+no+' 這手牌',url:url}).catch(function(e){if(!e||e.name!=='AbortError')copy()})}else copy();
+  };
+  dlg.addEventListener('close',function(){setHash('');if(shared){shared=false;closeBtn.textContent='✕ 關閉';window.scrollTo(0,0)}});
+  window.addEventListener('hashchange',function(){var m=/^#h(\d+)$/.exec(location.hash||'');if(m)show(m[1])});
+  var m=/^#h(\d+)$/.exec(location.hash||'');if(m&&document.getElementById('t'+m[1])){shared=true;closeBtn.textContent='☰ 看全部手牌';show(m[1])}
 })();
 </script></body></html>
