@@ -433,7 +433,7 @@ ol.acts li .more{grid-column:1/-1;display:flex;flex-direction:column;gap:5px;mar
   dlg.addEventListener('click',function(ev){if(ev.target===dlg)dlg.close()});
   var tx=0,ty=0,tok=false,edge=false;
   box.addEventListener('touchstart',function(ev){var t=ev.touches[0];tx=t.clientX;ty=t.clientY;edge=standalone&&tx<=28;tok=!(ev.target.closest&&ev.target.closest('.seats,.opts'))},{passive:true});
-  box.addEventListener('touchend',function(ev){var t=ev.changedTouches[0],dx=t.clientX-tx,dy=t.clientY-ty;if(edge){if(dx>60&&Math.abs(dx)>1.5*Math.abs(dy))dlg.close();return}if(!tok)return;if(Math.abs(dx)>80&&Math.abs(dx)>2.5*Math.abs(dy)){(dx<0?next:prev).click()}},{passive:true});
+  box.addEventListener('touchend',function(ev){var t=ev.changedTouches[0],dx=t.clientX-tx,dy=t.clientY-ty;if(edge){if(dx>60&&Math.abs(dx)>1.5*Math.abs(dy))dlg.close();return}if(!tok)return;if(dx<-80&&Math.abs(dx)>2.5*Math.abs(dy))dlg.close()},{passive:true});
   dlg.addEventListener('keydown',function(ev){if(ev.key==='ArrowLeft')prev.click();if(ev.key==='ArrowRight')next.click()});
     var SHARE='https://ai110002.github.io/hand-review-1124/',shared=false,closeBtn=document.getElementById('hvclose'),toastT=0;
   function toast(html,ms){var t=document.getElementById('hvtoast');if(!t){t=document.createElement('div');t.id='hvtoast';t.setAttribute('role','status');dlg.appendChild(t)}
